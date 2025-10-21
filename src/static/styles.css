@@ -142,3 +142,70 @@ footer {
   padding: 20px;
   color: #666;
 }
+
+/* Participants section styling */
+.participants-section {
+  margin-top: 12px;
+  padding: 10px;
+  background: linear-gradient(180deg, #ffffff, #fbfdff);
+  border: 1px solid #eef4ff;
+  border-radius: 6px;
+}
+
+.participants-title {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: #1a237e;
+  font-weight: 600;
+}
+
+.participants-list {
+  list-style-type: none; /* hide bullets */
+  margin: 0;
+  padding-left: 0;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.participant-item {
+  padding: 6px 0;
+  font-size: 14px;
+  color: #333;
+  border-bottom: 1px dashed rgba(0,0,0,0.03);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.participant-item.empty {
+  color: #666;
+  font-style: italic;
+  border-bottom: none;
+}
+
+/* delete button next to participant */
+.delete-participant {
+  background: transparent;
+  border: none;
+  color: #c62828;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+
+.delete-participant:hover {
+  background: rgba(198,40,40,0.08);
+}
+
+.participant-email {
+  margin-right: 10px;
+  word-break: break-all;
+}
+
+/* small screens: make cards full width */
+@media (max-width: 767px) {
+  .activity-card {
+    width: 100%;
+  }
+}
