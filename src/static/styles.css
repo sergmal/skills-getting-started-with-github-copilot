@@ -160,9 +160,9 @@ footer {
 }
 
 .participants-list {
-  list-style-type: disc;
+  list-style-type: none; /* hide bullets */
   margin: 0;
-  padding-left: 20px;
+  padding-left: 0;
   max-height: 160px;
   overflow-y: auto;
 }
@@ -172,12 +172,35 @@ footer {
   font-size: 14px;
   color: #333;
   border-bottom: 1px dashed rgba(0,0,0,0.03);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .participant-item.empty {
   color: #666;
   font-style: italic;
   border-bottom: none;
+}
+
+/* delete button next to participant */
+.delete-participant {
+  background: transparent;
+  border: none;
+  color: #c62828;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+
+.delete-participant:hover {
+  background: rgba(198,40,40,0.08);
+}
+
+.participant-email {
+  margin-right: 10px;
+  word-break: break-all;
 }
 
 /* small screens: make cards full width */

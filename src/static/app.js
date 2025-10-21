@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="participants-section">
           <h5 class="participants-title">Participants</h5>
           <ul class="participants-list">
-            ${participants.length ? participants.map(p => `<li class="participant-item">${escapeHTML(p)}</li>`).join('') : '<li class="participant-item empty">No participants yet</li>'}
+            ${participants.length ? participants.map(p => `<li class="participant-item"><span class="participant-email">${escapeHTML(p)}</span><button class="delete-participant" data-email="${escapeHTML(p)}" aria-label="Remove ${escapeHTML(p)}">✖</button></li>`).join('') : '<li class="participant-item empty">No participants yet</li>'}
           </ul>
         </div>
       `;
@@ -95,34 +95,8 @@ document.addEventListener('DOMContentLoaded', () => {
         showMessage(detail, 'error');
         return;
       }
-
-      // Success: update participants list in the UI
-      const card = Array.from(document.querySelectorAll('.activity-card'))
-        .find(c => c.dataset.activity === activityName);
-
-      if (card) {
-        const ul = card.querySelector('.participants-list');
-        // remove "No participants yet" placeholder if present
-        const emptyItem = ul.querySelector('.participant-item.empty');
-        if (emptyItem) emptyItem.remove();
-
-        const li = document.createElement('li');
-        li.className = 'participant-item';
-        li.textContent = email;
-        ul.appendChild(li);
-
-        // update capacity count
-        const capEl = card.querySelector('.capacity');
-        if (capEl) {
-          // parse current values and increment the left side
-          const match = capEl.textContent.match(/(\d+)\s*\/\s*(\d+)/);
-          if (match) {
-            const current = parseInt(match[1], 10) + 1;
-            const max = match[2];
-            capEl.innerHTML = `<strong>Capacity:</strong> ${current} / ${max}`;
-          }
-        }
-      }
+      // Success: reload activities from server so UI reflects actual state
+      await loadActivities();
 
       showMessage(`Signed up ${email} for ${activityName}`, 'success');
       signupForm.reset();
@@ -134,4 +108,58 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // initial load
   loadActivities();
+
+  // Event delegation: handle participant delete clicks
+  activitiesList.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.delete-participant');
+    if (!btn) return;
+
+    const email = btn.dataset.email;
+    const card = btn.closest('.activity-card');
+    if (!card || !email) return;
+
+    const activityName = card.dataset.activity;
+
+    try {
+      const url = `/activities/${encodeURIComponent(activityName)}/participants?email=${encodeURIComponent(email)}`;
+      const res = await fetch(url, { method: 'DELETE' });
+
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        const detail = errBody.detail || 'Failed to remove participant';
+        showMessage(detail, 'error');
+        return;
+      }
+
+      // remove the list item from the UI
+      const li = btn.closest('li');
+      if (li) li.remove();
+
+      // if list is empty after removal, show placeholder
+      const ul = card.querySelector('.participants-list');
+      if (ul && !ul.querySelector('.participant-item')) {
+        const emptyLi = document.createElement('li');
+        emptyLi.className = 'participant-item empty';
+        emptyLi.textContent = 'No participants yet';
+        ul.appendChild(emptyLi);
+      }
+
+      // update capacity count (decrement)
+      const capEl = card.querySelector('.capacity');
+      if (capEl) {
+        const match = capEl.textContent.match(/(\d+)\s*\/\s*(\d+)/);
+        if (match) {
+          let current = parseInt(match[1], 10) - 1;
+          if (current < 0) current = 0;
+          const max = match[2];
+          capEl.innerHTML = `<strong>Capacity:</strong> ${current} / ${max}`;
+        }
+      }
+
+      showMessage(`Removed ${email} from ${activityName}`, 'success');
+    } catch (err) {
+      showMessage('An error occurred while removing participant.', 'error');
+      console.error(err);
+    }
+  });
 });
